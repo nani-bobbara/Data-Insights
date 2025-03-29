@@ -10,6 +10,8 @@ services:
       - "3000:80"
     environment:
       - NODE_ENV=development
+      - VITE_SUPABASE_URL=${SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
     volumes:
       - ./projects/web-portal:/app/projects/web-portal
       - /app/projects/web-portal/node_modules
@@ -24,6 +26,8 @@ services:
       - "3001:80"
     environment:
       - NODE_ENV=development
+      - VITE_SUPABASE_URL=${SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
     volumes:
       - ./projects/user-portal:/app/projects/user-portal
       - /app/projects/user-portal/node_modules
@@ -38,6 +42,8 @@ services:
       - "3002:80"
     environment:
       - NODE_ENV=development
+      - VITE_SUPABASE_URL=${SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
     volumes:
       - ./projects/admin-portal:/app/projects/admin-portal
       - /app/projects/admin-portal/node_modules
