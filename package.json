@@ -1,0 +1,21 @@
+
+{
+  "name": "datainsight-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "projects/*"
+  ],
+  "scripts": {
+    "start:web": "cd projects/web-portal && npm run dev",
+    "start:user": "cd projects/user-portal && npm run dev",
+    "start:admin": "cd projects/admin-portal && npm run dev",
+    "build:web": "cd projects/web-portal && npm run build",
+    "build:user": "cd projects/user-portal && npm run build",
+    "build:admin": "cd projects/admin-portal && npm run build"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  }
+}

@@ -1,0 +1,53 @@
+
+version: '3.8'
+
+services:
+  web-portal:
+    build:
+      context: .
+      dockerfile: projects/web-portal/Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./projects/web-portal:/app/projects/web-portal
+      - /app/projects/web-portal/node_modules
+    depends_on:
+      - api-service
+
+  user-portal:
+    build:
+      context: .
+      dockerfile: projects/user-portal/Dockerfile
+    ports:
+      - "3001:80"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./projects/user-portal:/app/projects/user-portal
+      - /app/projects/user-portal/node_modules
+    depends_on:
+      - api-service
+
+  admin-portal:
+    build:
+      context: .
+      dockerfile: projects/admin-portal/Dockerfile
+    ports:
+      - "3002:80"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./projects/admin-portal:/app/projects/admin-portal
+      - /app/projects/admin-portal/node_modules
+    depends_on:
+      - api-service
+
+  api-service:
+    image: node:18-alpine
+    command: echo "API service placeholder - To be implemented"
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
