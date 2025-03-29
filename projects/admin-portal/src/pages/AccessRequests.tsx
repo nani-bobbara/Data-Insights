@@ -1,100 +1,78 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Card } from '@datainsight/ui-components';
-
-interface AccessRequest {
-  id: string;
-  name: string;
-  email: string;
-  company: string;
-  role: string;
-  plan: string;
-  requestDate: string;
-  status: 'pending' | 'approved' | 'rejected';
-}
+import { fetchAccessRequests, approveAccessRequest, rejectAccessRequest } from '../services/AccessRequestService';
+import { AccessRequest } from '../../../common/src/models/AccessRequest';
+import SecureAccessLinkModal from '../components/SecureAccessLinkModal';
 
 const AccessRequests = () => {
-  const [requests, setRequests] = useState<AccessRequest[]>([
-    {
-      id: '1',
-      name: 'John Doe',
-      email: 'john.doe@example.com',
-      company: 'Tech Solutions Inc.',
-      role: 'Data Analyst',
-      plan: 'Professional',
-      requestDate: '2023-06-23',
-      status: 'pending',
-    },
-    {
-      id: '2',
-      name: 'Sarah Johnson',
-      email: 'sarah.johnson@example.com',
-      company: 'Marketing Experts LLC',
-      role: 'Marketing Specialist',
-      plan: 'Professional',
-      requestDate: '2023-06-22',
-      status: 'pending',
-    },
-    {
-      id: '3',
-      name: 'Michael Chen',
-      email: 'michael.chen@example.com',
-      company: 'Global Enterprises',
-      role: 'Business Executive',
-      plan: 'Enterprise',
-      requestDate: '2023-06-21',
-      status: 'approved',
-    },
-    {
-      id: '4',
-      name: 'Emily Wilson',
-      email: 'emily.wilson@example.com',
-      company: 'Data Insights Co.',
-      role: 'Data Scientist',
-      plan: 'Professional',
-      requestDate: '2023-06-20',
-      status: 'rejected',
-    },
-    {
-      id: '5',
-      name: 'David Smith',
-      email: 'david.smith@example.com',
-      company: 'Smith & Associates',
-      role: 'Business Executive',
-      plan: 'Enterprise',
-      requestDate: '2023-06-19',
-      status: 'approved',
-    },
-  ]);
+  const [requests, setRequests] = useState<AccessRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [selectedRequest, setSelectedRequest] = useState<AccessRequest | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isSecureLinkModalOpen, setIsSecureLinkModalOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+
+  useEffect(() => {
+    loadAccessRequests();
+  }, []);
+
+  const loadAccessRequests = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await fetchAccessRequests();
+      setRequests(data);
+    } catch (err) {
+      console.error('Error fetching access requests:', err);
+      setError('Failed to load access requests. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleViewRequest = (request: AccessRequest) => {
     setSelectedRequest(request);
     setIsViewModalOpen(true);
   };
 
-  const handleApproveRequest = (id: string) => {
-    setRequests(prevRequests => 
-      prevRequests.map(request => 
-        request.id === id ? { ...request, status: 'approved' } : request
-      )
-    );
-    if (selectedRequest && selectedRequest.id === id) {
-      setSelectedRequest({ ...selectedRequest, status: 'approved' });
+  const handleApproveRequest = async (id: string) => {
+    try {
+      const success = await approveAccessRequest(id);
+      if (success) {
+        setRequests(prevRequests => 
+          prevRequests.map(request => 
+            request.id === id ? { ...request, status: 'approved' } : request
+          )
+        );
+        if (selectedRequest && selectedRequest.id === id) {
+          setSelectedRequest({ ...selectedRequest, status: 'approved' });
+          // Open the secure link modal after approval
+          setIsSecureLinkModalOpen(true);
+        }
+      }
+    } catch (err) {
+      console.error('Error approving request:', err);
     }
   };
 
-  const handleRejectRequest = (id: string) => {
-    setRequests(prevRequests => 
-      prevRequests.map(request => 
-        request.id === id ? { ...request, status: 'rejected' } : request
-      )
-    );
-    if (selectedRequest && selectedRequest.id === id) {
-      setSelectedRequest({ ...selectedRequest, status: 'rejected' });
+  const handleRejectRequest = async (id: string) => {
+    try {
+      const success = await rejectAccessRequest(id);
+      if (success) {
+        setRequests(prevRequests => 
+          prevRequests.map(request => 
+            request.id === id ? { ...request, status: 'rejected' } : request
+          )
+        );
+        if (selectedRequest && selectedRequest.id === id) {
+          setSelectedRequest({ ...selectedRequest, status: 'rejected' });
+        }
+      }
+    } catch (err) {
+      console.error('Error rejecting request:', err);
     }
   };
 
@@ -106,6 +84,29 @@ const AccessRequests = () => {
   const pendingCount = requests.filter(r => r.status === 'pending').length;
   const approvedCount = requests.filter(r => r.status === 'approved').length;
   const rejectedCount = requests.filter(r => r.status === 'rejected').length;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="w-10 h-10 border-t-2 border-b-2 border-primary rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading access requests...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 bg-red-50 border border-red-200 rounded-lg">
+        <h3 className="text-lg font-medium text-red-800 mb-2">Error</h3>
+        <p className="text-red-700">{error}</p>
+        <Button onClick={loadAccessRequests} className="mt-4">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -181,7 +182,7 @@ const AccessRequests = () => {
                   Company
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Plan
+                  Role
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Request Date
@@ -195,70 +196,86 @@ const AccessRequests = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredRequests.map((request) => (
-                <tr key={request.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-600">{request.name.charAt(0)}</span>
+              {filteredRequests.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                    No access requests found
+                  </td>
+                </tr>
+              ) : (
+                filteredRequests.map((request) => (
+                  <tr key={request.id}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 flex-shrink-0">
+                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-gray-600">{request.name.charAt(0)}</span>
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{request.name}</div>
+                          <div className="text-sm text-gray-500">{request.email}</div>
                         </div>
                       </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{request.name}</div>
-                        <div className="text-sm text-gray-500">{request.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{request.company}</div>
-                    <div className="text-sm text-gray-500">{request.role}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      request.plan === 'Enterprise' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {request.plan}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {request.requestDate}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                      request.status === 'approved' ? 'bg-green-100 text-green-800' : 
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Button variant="outline" size="sm" onClick={() => handleViewRequest(request)}>
-                      View
-                    </Button>
-                    {request.status === 'pending' && (
-                      <>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{request.company}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{request.role}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {request.requestDate}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                        request.status === 'approved' ? 'bg-green-100 text-green-800' : 
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <Button variant="outline" size="sm" onClick={() => handleViewRequest(request)}>
+                        View
+                      </Button>
+                      {request.status === 'pending' && (
+                        <>
+                          <Button 
+                            className="ml-2" 
+                            size="sm"
+                            onClick={() => handleApproveRequest(request.id)}
+                          >
+                            Approve
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="ml-2 text-red-500 border-red-300 hover:bg-red-50"
+                            onClick={() => handleRejectRequest(request.id)}
+                          >
+                            Reject
+                          </Button>
+                        </>
+                      )}
+                      {request.status === 'approved' && (
                         <Button 
                           className="ml-2" 
                           size="sm"
-                          onClick={() => handleApproveRequest(request.id)}
+                          variant="outline"
+                          onClick={() => {
+                            setSelectedRequest(request);
+                            setIsSecureLinkModalOpen(true);
+                          }}
                         >
-                          Approve
+                          Generate Link
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="ml-2 text-red-500 border-red-300 hover:bg-red-50"
-                          onClick={() => handleRejectRequest(request.id)}
-                        >
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -316,10 +333,6 @@ const AccessRequests = () => {
                           <p>{selectedRequest.role}</p>
                         </div>
                         <div>
-                          <h4 className="text-sm font-medium text-gray-500">Requested Plan</h4>
-                          <p>{selectedRequest.plan}</p>
-                        </div>
-                        <div>
                           <h4 className="text-sm font-medium text-gray-500">Request Date</h4>
                           <p>{selectedRequest.requestDate}</p>
                         </div>
@@ -327,7 +340,7 @@ const AccessRequests = () => {
                       
                       <div>
                         <h4 className="text-sm font-medium text-gray-500">Use Case</h4>
-                        <p className="text-sm">We need a comprehensive data analytics platform to help us understand customer behavior and optimize our marketing campaigns. Looking forward to using your AI insights feature.</p>
+                        <p className="text-sm">{selectedRequest.useCase}</p>
                       </div>
                     </div>
                   </div>
@@ -351,6 +364,17 @@ const AccessRequests = () => {
                     </Button>
                   </>
                 )}
+                {selectedRequest.status === 'approved' && (
+                  <Button 
+                    className="ml-3"
+                    onClick={() => {
+                      setIsViewModalOpen(false);
+                      setIsSecureLinkModalOpen(true);
+                    }}
+                  >
+                    Generate Access Link
+                  </Button>
+                )}
                 <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
                   Close
                 </Button>
@@ -358,6 +382,15 @@ const AccessRequests = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Secure Link Modal */}
+      {isSecureLinkModalOpen && selectedRequest && (
+        <SecureAccessLinkModal 
+          userId={selectedRequest.id}
+          userEmail={selectedRequest.email}
+          onClose={() => setIsSecureLinkModalOpen(false)}
+        />
       )}
     </div>
   );

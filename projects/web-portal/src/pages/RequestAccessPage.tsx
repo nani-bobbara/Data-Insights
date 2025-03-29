@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Button, Input } from '@datainsight/ui-components';
+import { submitAccessRequest } from '../services/AccessRequestService';
 
 const RequestAccessPage = () => {
   const [formData, setFormData] = useState({
@@ -14,21 +15,32 @@ const RequestAccessPage = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setErrorMessage(null);
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const result = await submitAccessRequest(formData);
+      
+      if (result.success) {
+        setIsSubmitted(true);
+      } else {
+        setErrorMessage(result.message);
+      }
+    } catch (error) {
+      setErrorMessage('An unexpected error occurred. Please try again later.');
+      console.error('Error submitting form:', error);
+    } finally {
       setIsSubmitting(false);
-      setIsSubmitted(true);
-    }, 1500);
+    }
   };
 
   if (isSubmitted) {
@@ -63,6 +75,12 @@ const RequestAccessPage = () => {
         </p>
 
         <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-100">
+          {errorMessage && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-md text-red-600">
+              {errorMessage}
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
               <Input
