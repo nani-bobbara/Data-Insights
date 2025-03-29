@@ -17,6 +17,10 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     host: '::',
-    port: 3001,
+    port: 8080,
+  },
+  define: {
+    // Define the WebSocket token to prevent the error
+    __WS_TOKEN__: JSON.stringify('lovable-ws-token'),
   },
 }));
