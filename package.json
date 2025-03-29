@@ -12,7 +12,8 @@
     "start:admin": "cd projects/admin-portal && npm run dev",
     "build:web": "cd projects/web-portal && npm run build",
     "build:user": "cd projects/user-portal && npm run build",
-    "build:admin": "cd projects/admin-portal && npm run build"
+    "build:admin": "cd projects/admin-portal && npm run build",
+    "build:dev": "vite build --mode development"
   },
   "devDependencies": {
     "typescript": "^5.0.4"
