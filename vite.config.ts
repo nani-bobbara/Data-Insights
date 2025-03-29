@@ -12,11 +12,14 @@ export default defineConfig(({ mode }) => ({
   ].filter(Boolean),
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './projects/web-portal/src'),
     },
   },
   server: {
     host: '::',
     port: 8080,
+  },
+  build: {
+    outDir: 'dist',
   },
 }));
