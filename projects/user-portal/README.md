@@ -1,0 +1,33 @@
+# DataInsight User Portal
+
+This is the user-facing application dashboard for the DataInsight platform. It allows authenticated users to upload data, create visualizations, and manage their account.
+
+## Features
+
+- Data upload and processing
+- Interactive dashboards
+- Visualization creation
+- Report generation
+- User settings
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## Environment Variables
+
+Create a `.env` file in this directory with the following variables:
+
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```

@@ -1,4 +1,3 @@
-
 version: '3.8'
 
 services:
@@ -51,9 +50,30 @@ services:
       - api-service
 
   api-service:
-    image: node:18-alpine
-    command: echo "API service placeholder - To be implemented"
+    build:
+      context: .
+      dockerfile: projects/api-service/Dockerfile
     ports:
       - "4000:4000"
     environment:
       - NODE_ENV=development
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+    volumes:
+      - ./projects/api-service:/app/projects/api-service
+      - /app/projects/api-service/node_modules
+
+  # Local development services
+  supabase-local:
+    image: supabase/supabase-local
+    ports:
+      - "54321:8000"  # REST API
+      - "54322:5432"  # PostgreSQL database
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - ./supabase/migrations:/migrations
+      - supabase-data:/var/lib/postgresql/data
+
+volumes:
+  supabase-data:

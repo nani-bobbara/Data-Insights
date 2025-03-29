@@ -1,24 +1,29 @@
-{
+{  
   "name": "datainsight-platform",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "DataInsight Platform - Comprehensive data analytics solution",
   "private": true,
   "workspaces": [
     "packages/*",
     "projects/*"
   ],
   "scripts": {
-    "start:web": "cd projects/web-portal && npm run dev",
-    "start:user": "cd projects/user-portal && npm run dev",
-    "start:admin": "cd projects/admin-portal && npm run dev",
+    "dev:web": "cd projects/web-portal && npm run dev",
+    "dev:user": "cd projects/user-portal && npm run dev",
+    "dev:admin": "cd projects/admin-portal && npm run dev",
+    "dev:api": "cd projects/api-service && npm run dev",
     "build:web": "cd projects/web-portal && npm run build",
     "build:user": "cd projects/user-portal && npm run build",
     "build:admin": "cd projects/admin-portal && npm run build",
-    "build:dev": "vite build --mode development"
+    "build:api": "cd projects/api-service && npm run build",
+    "build": "npm run build:web && npm run build:user && npm run build:admin && npm run build:api",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "engines": {
+    "node": ">=18",
+    "npm": ">=9"
   },
   "devDependencies": {
     "typescript": "^5.0.4"
-  },
-  "dependencies": {
-    "lovable-tagger": "^1.1.7"
   }
 }

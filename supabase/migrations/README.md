@@ -1,21 +1,28 @@
+# Database Migrations
 
-# Supabase Migrations
+This directory contains SQL migrations for the DataInsight platform. Migrations are applied in order, so the naming convention is important.
 
-This directory contains SQL migrations for the Supabase database schema.
+## Naming Convention
 
-## Migration Files
+Use a prefix to ensure migrations are applied in the correct order:
 
-Migrations are applied in sequential order based on the file prefix (e.g., 001, 002).
+```
+001-create-tables.sql
+002-add-columns.sql
+003-add-indexes.sql
+```
 
-Each migration should:
-- Be idempotent when possible
-- Include both "up" (apply) and "down" (rollback) operations
-- Be properly commented to explain the changes
+## Running Migrations
 
-## Creating New Migrations
+To apply migrations:
 
-When adding a new migration:
-1. Create a new SQL file with the next sequential number
-2. Include a descriptive name in the filename
-3. Document the purpose of the migration with comments
-4. Test the migration on a development database before applying to production
+```bash
+supabase db push
+```
+
+## Important Notes
+
+- Always test migrations locally before applying to production
+- Make migrations idempotent when possible
+- Consider data migration as well as schema changes
+- Document any manual steps required for upgrades

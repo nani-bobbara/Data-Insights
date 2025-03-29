@@ -1,29 +1,43 @@
-
 # Supabase Configuration
 
-This directory contains all Supabase-related configurations, migrations, and seeds.
+This directory contains all Supabase-related configurations for the DataInsight platform.
 
 ## Structure
 
-- `migrations/`: SQL migrations for schema changes
-- `seeds/`: Seed data for development and testing
-- `functions/`: Edge functions for custom backend logic
+- `/migrations`: SQL migrations for database schema changes
+- `/seeds`: Seed data for development and testing
+- `/functions`: Edge functions for server-side logic
 
 ## Getting Started
 
-1. Make sure you have the Supabase CLI installed
-2. Link your local project to your Supabase project: `supabase link --project-ref dnalijqcgdzvlzzzpsmr`
-3. Run migrations: `supabase db push`
+1. Install the Supabase CLI:
+   ```bash
+   npm install -g supabase
+   ```
+
+2. Start a local Supabase instance:
+   ```bash
+   supabase start
+   ```
+
+3. Apply migrations:
+   ```bash
+   supabase db push
+   ```
+
+4. Seed the database (if needed):
+   ```bash
+   supabase db seed
+   ```
 
 ## Migrations
 
-When making schema changes:
-1. Create a new migration file in the `migrations/` directory
-2. Name it sequentially (e.g., `001-create-users.sql`, `002-add-profiles.sql`)
-3. Apply the migration using the Supabase CLI
+Migrations are stored in SQL files in the `/migrations` directory. They are applied in alphabetical order, so it's recommended to prefix them with a timestamp or sequence number.
 
-## Local Development
+## Edge Functions
 
-For local development with Supabase:
-1. Start a local Supabase instance: `supabase start`
-2. Connect your application using the local connection details
+Edge functions provide server-side logic without managing server infrastructure. They can be deployed using the Supabase CLI:
+
+```bash
+supabase functions deploy my-function
+```
